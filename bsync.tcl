@@ -13,8 +13,6 @@ package require tablelist
 # file system with file ${backupDriveIdentifier} at its root will be used as backup disk
 set backupDriveIdentifier "Buffalo.txt"
 
-# directory where helper applications (rsync, ln, rm) can be found
-set path [file join c:/ cygwin bin]
 
 # syncItems
 # ${backupDrive} will be expanded at runtime to the disk with the file ${backupDriveIdentifier} at its root
@@ -105,6 +103,50 @@ proc putsLog {line args} {
 	}
     }
 }
+
+
+# 
+# platform dependent settings
+#
+
+if {$tcl_platform(platform) == "macintosh"} {
+    # Key for menu shortcuts
+    set modifier Command
+
+    # Preferences files location (user independent)
+    set pmAppPrefs [file join $scriptDir prefsDefaults.tcl]
+    # Preferences files location (user specific)
+    set pmUserPrefs [file join $env(HOME) .bsync]
+
+    # directory where helper applications (rsync, ln, rm) can be found
+    set path "[file join /usr local bin]:[file join /bin]:[file join /usr bin]:[file join /sbin]:[file join /usr sbin]"
+    set pathSeparator ":"
+} elseif {$tcl_platform(platform) == "windows"} {
+    # Key for menu shortcuts
+    set modifier Control
+
+    # Preferences files location (user independent)
+    set pmAppPrefs [file join $scriptDir prefsDefaults.tcl]
+    # Preferences files location (user specific)
+    set pmUserPrefs [file join $env(HOME) .bsync]
+
+    # directory where helper applications (rsync, ln, rm) can be found
+    set path "[file join c:/ cygwin bin]"
+    set pathSeparator ";"
+} else {
+    # Key for menu shortcuts
+    set modifier Meta
+
+    # Preferences files location (user independent)
+    set pmAppPrefs [file join $scriptDir prefsDefaults.tcl]
+    # Preferences files location (user specific)
+    set pmUserPrefs [file join $env(HOME) .bsync]
+
+    # directory where helper applications (rsync, ln, rm) can be found
+    set path "[file join /cygdrive c  cygwin bin]"
+    set pathSeparator ":"
+}
+
 
 
 #
@@ -327,28 +369,39 @@ proc backupDrive {identifier} {
 }
 
 
-# sets the names of some helper executables. They are assumed to live in one of the directories given by path
-proc findCommands {path} {
+# sets the names of some helper executables. They are assumed to live in one of the directories given by pathList
+# returns true if all commands have been found on path, false otherwise
+proc findCommands {commandNames pathList pathSeparator} {
     global commands
 
-    set commands(rsync) [file join $path rsync]
-    set commands(rm) [file join $path rm]
-    set commands(ln) [file join $path ln]
-    set commands(df) [file join $path df]
+    catch {unset commands}
 
-    foreach name [array names commands] {
-	if ![file exists $commands($name)] {
-	    if ![file exists $commands($name).exe] {
-		putsLog "command not found: $name" Error
+    set found true
+    foreach name $commandNames {
+	putsLog "looking for $name..."
+	foreach path [split $pathList $pathSeparator] {
+	    if {[file exists [file join $path $name]] || [file exists [file join $path $name].exe]} {
+		set commands($name) [file join $path $name]
+		putsLog "$commands($name)"
+		break
 	    }
 	}
+	if ![info exists commands($name)] {
+	    putsLog "not found." Error
+	    set found false
+	}
     }
-    if [catch {exec $commands(rsync) --help} rsyncOutput] {
-	putsLog "error calling rsync: $rsyncOutput" Error
-    } else {
-	# output rsync version
-	putsLog "[lindex [split $rsyncOutput \n] 0]"
+
+    if {$found == true} {
+	if [catch {exec $commands(rsync) --help} rsyncOutput] {
+	    putsLog "error calling rsync: $rsyncOutput" Error
+	} else {
+	    # output rsync version
+	    putsLog "[lindex [split $rsyncOutput \n] 0]"
+	}
     }
+
+    return $found
 }
 
 
@@ -651,7 +704,10 @@ setEnabledStateArrayFromGUI
 
 putsLog "tcl_version = $tcl_version"
 putsLog "tk_version = $tk_version"
-findCommands $path
+
+set helperCommands [list rsync rm ln df]
+findCommands $helperCommands $path $pathSeparator
+
 update
 set guiItems(backupDrive) [backupDrive $backupDriveIdentifier]
 if {$guiItems(backupDrive) != "not found"} {
