@@ -13,12 +13,12 @@
 BACKUPDRIVEIDENTIFIER=Buffalo.txt
 
 for i in `mount | awk '{print $3}'`
-  do
-  if [ -f ${i}/${BACKUPDRIVEIDENTIFIER} ]
-      then
-      export BACKUPDRIVE=${i}
-      echo "$0: Backup drive = $BACKUPDRIVE"
-  fi
+do
+    if [ -f ${i}/${BACKUPDRIVEIDENTIFIER} ]
+    then
+	export BACKUPDRIVE=${i}
+	echo "$0: Backup drive = $BACKUPDRIVE"
+    fi
 done
 
 

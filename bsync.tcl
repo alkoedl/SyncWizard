@@ -444,13 +444,13 @@ proc mainDialog_buttonQuit {} {
 proc createCheckButton {tbl row col w} {
     set key [$tbl getkeys $row]
     checkbutton $w -variable enabledState($key)
-#    if [$tbl cellcget $row,enabled -text] {
-#	puts "row = $row, key = $key, $w selected"
-#	#$w select
-#    } else {
-#	puts "row = $row, key = $key, $w deselected"
-#	#$w deselect
-#    }
+    #    if [$tbl cellcget $row,enabled -text] {
+    #	puts "row = $row, key = $key, $w selected"
+    #	#$w select
+    #    } else {
+    #	puts "row = $row, key = $key, $w deselected"
+    #	#$w deselect
+    #    }
 }
 
 # used by tablelist when formatting the text in a checkbutton cell
@@ -552,10 +552,10 @@ proc mainDialogOpen {} {
 	-height 10 -width 0 \
 	-listvariable syncItemsList
 
-#    -stretch all -stripeheight 1 \
-#	-labelfont {-family lucida-grande -size 10} \
-#	-font {-family lucida-grande -size 10} \
-#	-setgrid yes 
+    #    -stretch all -stripeheight 1 \
+	#	-labelfont {-family lucida-grande -size 10} \
+	#	-font {-family lucida-grande -size 10} \
+	#	-setgrid yes 
     $tbl columnconfigure 0 -name enabled -formatcommand emptyStr
     $tbl columnconfigure 1 -name name
 
