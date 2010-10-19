@@ -79,27 +79,41 @@ array set outputColor [list Error fgRed Warning fgOrange Info {} Pipe fgBrown De
 # true -> force output to stdout instead of log pane
 set forceStdout false
 
-proc putsLog {line args} {
+proc putsLog {args} {
     global outputSeverity outputLabel outputColor
     global log verbosityLevel forceStdout
     global logToPane 
     global logToFile logStream
 
-    if {[llength $args] == 0} {
-	set type Info
-    } elseif {[llength $args] == 1} {
-	set type [lindex $args 0]
-    } else {
-	putsLog "putsLog: wrong number of arguments ([expr [llength $args] + 1]). Should be 1 or 2." Error
+    set option ""
+    if {[llength $args] > 1} {
+	if {[lindex $args 0] == "-nonewline"} {
+	    set option "-nonewline"
+	    set args [lreplace $args 0 0]
+	}
     }
+
+    if {[llength $args] == 1} {
+	set type Info
+    } elseif {[llength $args] == 2} {
+	set type [lindex $args 1]
+    } else {
+	putsLog "putsLog: wrong number of arguments ([llength $args]). Should be 1 or 2." Error
+    }
+
+    set string [lindex $args 0]
 
     if {$outputSeverity($type) <= $outputSeverity($verbosityLevel)} {
 	if {[info exists log] && $logToPane == "true"} {
-	    $log insert end "$outputLabel($type)$line\n" $outputColor($type)
+	    if {$option == "-nonewline"} {
+		$log insert end "$outputLabel($type)$string" $outputColor($type)
+	    } else {
+		$log insert end "$outputLabel($type)$string\n" $outputColor($type)
+	    }
 	    $log see end
 	}
 	if {$logToFile == "true" && [info exists logStream]} {
-	    puts $logStream "$outputLabel($type)$line"
+	    puts $option $logStream "$outputLabel($type)$string"
 	}
     }
 }
@@ -352,7 +366,7 @@ proc backupDrive {identifier} {
     global commands
 
     set drive "not found"
-    putsLog "searching for backup drive..."
+    putsLog -nonewline "searching for backup drive... "
     update idletasks
     foreach aDrive [file volumes] {
 	if [file exists [file join $aDrive $identifier]] {
@@ -361,9 +375,10 @@ proc backupDrive {identifier} {
 	}
     }
     if {$drive == "not found"} {
+	putsLog ""
 	putsLog "couldn't find backup drive. Must contain file \"$identifier\" at file system root level." Error
     } else {
-	putsLog "backup drive: $drive"
+	putsLog $drive
     }
     return $drive
 }
@@ -378,7 +393,7 @@ proc findCommands {commandNames pathList pathSeparator} {
 
     set found true
     foreach name $commandNames {
-	putsLog "looking for $name..."
+	putsLog -nonewline "looking for $name... "
 	foreach path [split $pathList $pathSeparator] {
 	    if {[file exists [file join $path $name]] || [file exists [file join $path $name].exe]} {
 		set commands($name) [file join $path $name]
@@ -387,6 +402,7 @@ proc findCommands {commandNames pathList pathSeparator} {
 	    }
 	}
 	if ![info exists commands($name)] {
+	    putsLog ""
 	    putsLog "not found." Error
 	    set found false
 	}
