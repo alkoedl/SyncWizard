@@ -109,7 +109,7 @@ proc putsLog {line args} {
 # platform dependent settings
 #
 
-if {$tcl_platform(platform) == "macintosh"} {
+if {$tcl_platform(platform) == "unix"} {
     # Key for menu shortcuts
     set modifier Command
 
