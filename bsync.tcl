@@ -106,7 +106,7 @@ proc putsLog {line args} {
 
 
 # 
-# platform dependent settings
+# platform dependent settings, perhaps additionally/instead use [tk windowingsystem] and tcl_platform(os)
 #
 
 if {$tcl_platform(platform) == "unix"} {
