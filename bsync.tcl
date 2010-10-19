@@ -120,47 +120,56 @@ proc putsLog {args} {
 
 
 # 
-# platform dependent settings, perhaps additionally/instead use [tk windowingsystem] and tcl_platform(os)
+# platform dependent settings: modifier keys, preference files location, paths to helper applications
 #
 
-if {$tcl_platform(platform) == "unix"} {
-    # Key for menu shortcuts
-    set modifier Command
+switch -exact [tk windowingsystem] {
 
-    # Preferences files location (user independent)
-    set pmAppPrefs [file join $scriptDir prefsDefaults.tcl]
-    # Preferences files location (user specific)
-    set pmUserPrefs [file join $env(HOME) .bsync]
+    "aqua" {
+	# Mac OS X systems
+	# Key for menu shortcuts
+	set modifier Command
 
-    # directory where helper applications (rsync, ln, rm) can be found
-    set path "[file join /usr local bin]:[file join /bin]:[file join /usr bin]:[file join /sbin]:[file join /usr sbin]"
-    set pathSeparator ":"
-} elseif {$tcl_platform(platform) == "windows"} {
-    # Key for menu shortcuts
-    set modifier Control
+	# Preferences files location (user independent)
+	set pmAppPrefs [file join $scriptDir prefsDefaults.tcl]
+	# Preferences files location (user specific)
+	set pmUserPrefs [file join $env(HOME) .bsync]
 
-    # Preferences files location (user independent)
-    set pmAppPrefs [file join $scriptDir prefsDefaults.tcl]
-    # Preferences files location (user specific)
-    set pmUserPrefs [file join $env(HOME) .bsync]
+	# directory where helper applications (rsync, ln, rm) can be found
+	set path "[file join /usr local bin]:[file join /bin]:[file join /usr bin]:[file join /sbin]:[file join /usr sbin]"
+	set pathSeparator ":"
+    }
 
-    # directory where helper applications (rsync, ln, rm) can be found
-    set path "[file join c:/ cygwin bin]"
-    set pathSeparator ";"
-} else {
-    # Key for menu shortcuts
-    set modifier Meta
+    "win32" {
+	# windows systems (including cygwin)
+	# Key for menu shortcuts
+	set modifier Control
 
-    # Preferences files location (user independent)
-    set pmAppPrefs [file join $scriptDir prefsDefaults.tcl]
-    # Preferences files location (user specific)
-    set pmUserPrefs [file join $env(HOME) .bsync]
+	# Preferences files location (user independent)
+	set pmAppPrefs [file join $scriptDir prefsDefaults.tcl]
+	# Preferences files location (user specific)
+	set pmUserPrefs [file join $env(HOME) .bsync]
 
-    # directory where helper applications (rsync, ln, rm) can be found
-    set path "[file join /cygdrive c  cygwin bin]"
-    set pathSeparator ":"
+	# directory where helper applications (rsync, ln, rm) can be found
+	set path "[file join c:/ cygwin bin]"
+	set pathSeparator ";"
+    }
+
+    default {
+	# various flavours of unix
+	# Key for menu shortcuts
+	set modifier Meta
+
+	# Preferences files location (user independent)
+	set pmAppPrefs [file join $scriptDir prefsDefaults.tcl]
+	# Preferences files location (user specific)
+	set pmUserPrefs [file join $env(HOME) .bsync]
+
+	# directory where helper applications (rsync, ln, rm) can be found
+	set path "[file join /usr local bin]:[file join /bin]:[file join /usr bin]:[file join /sbin]:[file join /usr sbin]"
+	set pathSeparator ":"
+    }
 }
-
 
 
 #
