@@ -4,6 +4,7 @@
 
 #
 # To do:
+# / klicking Start two times in a row does not work because of a problem with the log stream not being found
 # - show a table with sync items:
 #   checkbutton(enabled) source dest link-dest options progressBar button(purgeOldBackups) 
 #
@@ -113,7 +114,11 @@ proc putsLog {args} {
 	    $log see end
 	}
 	if {$logToFile == "true" && [info exists logStream]} {
-	    puts $option $logStream "$outputLabel($type)$string"
+	    if {$option == "-nonewline"} {
+		puts -nonewline $logStream "$outputLabel($type)$string"
+	    } else {
+		puts $logStream "$outputLabel($type)$string"
+	    }
 	}
     }
 }
@@ -372,7 +377,6 @@ proc win2Cygwin {path} {
 # searches all connected drives for one with the file "identifier" at root file system level 
 # and returns the path to this file system's root
 proc backupDrive {identifier} {
-    global commands
 
     set drive "not found"
     putsLog -nonewline "searching for backup drive... "
@@ -460,7 +464,7 @@ proc mainDialog_buttonStartSync {} {
 		    dict with info {
 			set startTime [clock seconds]
 			if [dict exists $syncItems $name link-dest] {
-			    set cmd "$commands(rsync) $options --link-dest=[win2Cygwin [subst ${link-dest}]] [win2Cygwin [subst $source]] [win2Cygwin [subst $dest]]"
+			    set cmd "$commands(nice) $commands(rsync) $options --link-dest=[win2Cygwin [subst ${link-dest}]] [win2Cygwin [subst $source]] [win2Cygwin [subst $dest]]"
 			    pipeStart $cmd
 			    vwait state
 			    if [file isdirectory [subst $dest]] {
@@ -483,7 +487,7 @@ proc mainDialog_buttonStartSync {} {
 				$tbl rowconfigure $activeSyncItemNr -fg red
 			    }
 			} else {
-			    set cmd "$commands(rsync) $options [win2Cygwin [subst $source]] [win2Cygwin [subst $dest]]"
+			    set cmd "$commands(nice) $commands(rsync) $options [win2Cygwin [subst $source]] [win2Cygwin [subst $dest]]"
 			    pipeStart $cmd
 			    vwait state
 			}
@@ -730,7 +734,7 @@ setEnabledStateArrayFromGUI
 putsLog "tcl_version = $tcl_version"
 putsLog "tk_version = $tk_version"
 
-set helperCommands [list rsync rm ln df]
+set helperCommands [list rsync nice rm ln df]
 findCommands $helperCommands $path $pathSeparator
 
 update
