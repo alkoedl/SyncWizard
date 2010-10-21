@@ -4,9 +4,11 @@
 
 #
 # To do:
-# / klicking Start two times in a row does not work because of a problem with the log stream not being found
-# - show a table with sync items:
-#   checkbutton(enabled) source dest link-dest options progressBar button(purgeOldBackups) 
+# - implement progressBar for each syncItem individually (perhaps within a table cell)
+# - implement button(purgeOldBackups) 
+# - disable Start/Quit buttons during sync
+# - disable Start/Quit menu entries during sync
+# - change Start to Cancel button during sync
 #
 
 package require tablelist
@@ -500,6 +502,7 @@ proc mainDialog_buttonStartSync {} {
 	    set state "Done."
 	    set guiItem(memoryAvailable) [availableDiskSpace $guiItems(backupDrive) GB]
 	    close $logStream
+	    unset logStream
 	    $progressBar stop
 	}
     }
