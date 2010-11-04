@@ -164,8 +164,8 @@ proc Synchronize {sourceDir destDir} {
 	}
 	
 	if [file isdirectory $file] {
-	    puts $ostream "Comparing dirs: $source <-> $dest"
-	    flush $ostream
+	    #puts $ostream "Comparing dirs: $source <-> $dest"
+	    #flush $ostream
 	    Synchronize $source $dest
 	} else {
 	    set fileType [file attributes $source -type]
