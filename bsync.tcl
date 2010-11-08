@@ -32,15 +32,15 @@ dict set syncItems incrBackup_mail dest {${backupDrive}/rsync/Mail/${date}/}
 dict set syncItems incrBackup_mail link-dest {${backupDrive}/rsync/Mail/latest}
 dict set syncItems incrBackup_mail options {-a -u --progress --stats --delete}
 
+dict set syncItems fullBackup_repo_pitaya2d enabled 0
+dict set syncItems fullBackup_repo_pitaya2d source {svnowner@10.148.255.24:/volumes/data_pool/Repositories/REPSVN_cpqpsk_2008-01-01/}
+dict set syncItems fullBackup_repo_pitaya2d dest {d:/user/spb/tmp/RepositoriesTest/REPSVN_cpqpsk_2008-01-01}
+dict set syncItems fullBackup_repo_pitaya2d options {-a -u --progress --stats --delete -e ${ssh} --rsync-path=/usr/bin/rsync}
+
 dict set syncItems fullBackup_repo_x2d enabled 1
 dict set syncItems fullBackup_repo_x2d source {x:/Repositories/REPSVN_cpqpsk_2008-01-01/}
 dict set syncItems fullBackup_repo_x2d dest {d:/Development/Repositories/REPSVN_cpqpsk_2008-01-01}
 dict set syncItems fullBackup_repo_x2d options {-a -u --progress --stats --delete}
-
-dict set syncItems fullBackup_repo_pitaya2d enabled 0
-dict set syncItems fullBackup_repo_pitaya2d source {svnowner@10.148.255.24:/volumes/data_pool/Repositories/REPSVN_cpqpsk_2008-01-01/}
-dict set syncItems fullBackup_repo_pitaya2d dest {d:/user/spb/tmp/RepositoriesTest/REPSVN_cpqpsk_2008-01-01}
-dict set syncItems fullBackup_repo_pitaya2d options {-a -u --progress --stats --delete -e ssh --rsync-path=/usr/local/bin/rsync}
 
 dict set syncItems incrBackup_repo_x enabled 1
 dict set syncItems incrBackup_repo_x source {x:/Repositories/REPSVN_cpqpsk_2008-01-01/}
@@ -376,8 +376,9 @@ proc win2Cygwin {path} {
 
     if [regexp {([a-z]):/} [string tolower [lindex $dirs 0]] match drive] {
 	set dirs [lreplace $dirs 0 0 / cygdrive $drive]
+	return [eval file join $dirs]$trailingSlash
     }
-    return [eval file join $dirs]$trailingSlash
+    return $path
 }
 
 
@@ -452,7 +453,11 @@ proc mainDialog_buttonStartSync {} {
     global backupDriveIdentifier
 
     set guiItems(backupDrive) [backupDrive $backupDriveIdentifier]
+
+    # Variables backupDrive and ssh are expanded by the subst commands below.
+    # Their names may not be changed
     set backupDrive $guiItems(backupDrive)
+    set ssh $commands(ssh)
 
     setEnabledStateInDictFromArray
 
@@ -465,13 +470,15 @@ proc mainDialog_buttonStartSync {} {
 		if [dict get $syncItems $name enabled] {
 		    set activeSyncItemNr [lsearch -exact [dict keys $syncItems] $name]
 		    set guiItem(memoryAvailable) [availableDiskSpace $guiItems(backupDrive) GB]
+		    # Variable date is expanded by the subst commands below.
+		    # Its name may not be changed
 		    set date [currentDateAndTime]
 		    putsLog "${date} Running sync item $name"
 		    set state "Running sync item $name"
 		    dict with info {
 			set startTime [clock seconds]
 			if [dict exists $syncItems $name link-dest] {
-			    set cmd "$commands(nice) $commands(rsync) $options --link-dest=[win2Cygwin [subst ${link-dest}]] [win2Cygwin [subst $source]] [win2Cygwin [subst $dest]]"
+			    set cmd "$commands(nice) $commands(rsync) [subst $options] --link-dest=[win2Cygwin [subst ${link-dest}]] [win2Cygwin [subst $source]] [win2Cygwin [subst $dest]]"
 			    pipeStart $cmd
 			    vwait state
 			    if [file isdirectory [subst $dest]] {
@@ -494,7 +501,7 @@ proc mainDialog_buttonStartSync {} {
 				$tbl rowconfigure $activeSyncItemNr -fg red
 			    }
 			} else {
-			    set cmd "$commands(nice) $commands(rsync) $options [win2Cygwin [subst $source]] [win2Cygwin [subst $dest]]"
+			    set cmd "$commands(nice) $commands(rsync) [subst $options] [win2Cygwin [subst $source]] [win2Cygwin [subst $dest]]"
 			    pipeStart $cmd
 			    vwait state
 			}
@@ -742,7 +749,7 @@ setEnabledStateArrayFromGUI
 putsLog "tcl_version = $tcl_version"
 putsLog "tk_version = $tk_version"
 
-set helperCommands [list rsync nice rm ln df]
+set helperCommands [list rsync nice ssh rm ln df]
 findCommands $helperCommands $path $pathSeparator
 
 update
