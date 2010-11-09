@@ -32,28 +32,34 @@ dict set syncItems incrBackup_mail dest {${backupDrive}/rsync/Mail/${date}/}
 dict set syncItems incrBackup_mail link-dest {${backupDrive}/rsync/Mail/latest}
 dict set syncItems incrBackup_mail options {-a -u --progress --stats --delete}
 
-dict set syncItems fullBackup_repo_pitaya2d enabled 0
+dict set syncItems fullBackup_repo_pitaya2d enabled 1
 dict set syncItems fullBackup_repo_pitaya2d source {svnowner@10.148.255.24:/volumes/data_pool/Repositories/REPSVN_cpqpsk_2008-01-01/}
-dict set syncItems fullBackup_repo_pitaya2d dest {d:/user/spb/tmp/RepositoriesTest/REPSVN_cpqpsk_2008-01-01}
+dict set syncItems fullBackup_repo_pitaya2d dest {d:/Development/Repositories/REPSVN_cpqpsk_2008-01-01}
 dict set syncItems fullBackup_repo_pitaya2d options {-a -u --progress --stats --delete -e ${ssh} --rsync-path=/usr/bin/rsync}
 
-dict set syncItems fullBackup_repo_x2d enabled 1
+dict set syncItems incrBackup_repo_pitaya enabled 1
+dict set syncItems incrBackup_repo_pitaya source {svnowner@10.148.255.24:/volumes/data_pool/Repositories/REPSVN_cpqpsk_2008-01-01/}
+dict set syncItems incrBackup_repo_pitaya dest {${backupDrive}/rsync/REPSVN_cpqpsk_2008-01-01/${date}}
+dict set syncItems incrBackup_repo_pitaya link-dest {${backupDrive}/rsync/REPSVN_cpqpsk_2008-01-01/latest}
+dict set syncItems incrBackup_repo_pitaya options {-a -u --progress --stats --delete -e ${ssh} --rsync-path=/usr/bin/rsync}
+
+dict set syncItems fullBackup_repo_x2d enabled 0
 dict set syncItems fullBackup_repo_x2d source {x:/Repositories/REPSVN_cpqpsk_2008-01-01/}
 dict set syncItems fullBackup_repo_x2d dest {d:/Development/Repositories/REPSVN_cpqpsk_2008-01-01}
 dict set syncItems fullBackup_repo_x2d options {-a -u --progress --stats --delete}
 
-dict set syncItems incrBackup_repo_x enabled 1
+dict set syncItems incrBackup_repo_x enabled 0
 dict set syncItems incrBackup_repo_x source {x:/Repositories/REPSVN_cpqpsk_2008-01-01/}
 dict set syncItems incrBackup_repo_x dest {${backupDrive}/rsync/REPSVN_cpqpsk_2008-01-01/${date}}
 dict set syncItems incrBackup_repo_x link-dest {${backupDrive}/rsync/REPSVN_cpqpsk_2008-01-01/latest}
 dict set syncItems incrBackup_repo_x options {-a -u --progress --stats --delete}
 
-dict set syncItems fullBackup_repo100GGUI_x2d enabled 1
+dict set syncItems fullBackup_repo100GGUI_x2d enabled 0
 dict set syncItems fullBackup_repo100GGUI_x2d source {x:/Repositories/REPSVN_CP-QPSKRX_GUI/}
 dict set syncItems fullBackup_repo100GGUI_x2d dest {d:/Development/Repositories/REPSVN_CP-QPSKRX_GUI}
 dict set syncItems fullBackup_repo100GGUI_x2d options {-a -u --progress --stats --delete}
 
-dict set syncItems incrBackup_repo100GGUI_x enabled 1
+dict set syncItems incrBackup_repo100GGUI_x enabled 0
 dict set syncItems incrBackup_repo100GGUI_x source {x:/Repositories/REPSVN_CP-QPSKRX_GUI/}
 dict set syncItems incrBackup_repo100GGUI_x dest {${backupDrive}/rsync/REPSVN_CP-QPSKRX_GUI/${date}}
 dict set syncItems incrBackup_repo100GGUI_x link-dest {${backupDrive}/rsync/REPSVN_CP-QPSKRX_GUI/latest}
